@@ -3,17 +3,15 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    paulcores.url = "github:PaulStoffregen/cores";
+    paulcores.flake = false;
   };
   outputs =
     inputs@{
       self,
       nixpkgs,
-      unstable,
       flake-parts,
-      smoServer,
-      agenix,
-      agenix-rekey,
-    #devshell,
+      paulcores,
     }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
@@ -27,19 +25,31 @@
           system,
           ...
         }:
-        {
-          # Per-system attributes can be defined here. The self' and inputs'
-          # module parameters provide easy access to attributes of the same
-          # system.
-          #devshells.default = {
+        let
+          foo = true;
+          #teensy4-core = pkgs.stdenv.mkDerivation rec {
+          #  name = "teensy4-core";
+          #  buildInputs = [
+          #    gnumake
+          #    gcc-arm-embedded-13
+          #  ];
+          #  phases = ["unpackPhase" "buildPhase" "installPhase"];
 
+          #  buildPhase =
           #};
+        in
+        {
+          _module.args.pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [ ];
             buildInputs = with pkgs; [
               gcc
-              gcc-arm-embedded-4_7
+              gcc-arm-embedded-13
               teensy-loader-cli
+              teensyduino
             ];
             # LD_LIBRARY_PATH = unstable.lib.makeLibraryPath devTools;
           };
